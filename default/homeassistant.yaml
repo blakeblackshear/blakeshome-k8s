@@ -1,0 +1,75 @@
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: home-assistant
+  namespace: default
+spec:
+  entryPoints:
+    - websecure
+  routes:
+  - match: Host(`hass.blakeshome.com`)
+    kind: Rule
+    services:
+    - name: default-homeassistant-home-assistant
+      port: 8123
+  tls:
+    certResolver: le
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: code-server
+  namespace: default
+spec:
+  entryPoints:
+    - websecure
+  routes:
+  - match: Host(`code.blakeshome.com`)
+    kind: Rule
+    services:
+      - name: default-homeassistant-home-assistant
+        port: 8124
+    middlewares:
+      - name: traefik-forward-auth
+  tls:
+    certResolver: le
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: homeassistant
+  namespace: default
+spec:
+  chart:
+    repository: https://billimek.com/billimek-charts/
+    name: home-assistant
+    version: 1.0.0
+  values:
+    image:
+      repository: homeassistant/home-assistant
+      tag: 0.111.3
+    persistence:
+      enabled: true
+      size: 2Gi
+      existingClaim: homeassistant
+    hostNetwork: true
+    probes:
+      liveness:
+        enabled: false
+      readiness:
+        enabled: false
+    resources:
+      limits:
+        memory: 2500Mi
+      requests:
+        cpu: 35m
+        memory: 2000Mi
+    vscode:
+      enabled: true
+      service:
+        port: 8124
+      image:
+        repository: codercom/code-server
+        tag: 3.3.1
+        pullPolicy: IfNotPresent

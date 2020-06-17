@@ -1,0 +1,104 @@
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: frigate
+  namespace: default
+spec:
+  entryPoints:
+    - websecure
+  routes:
+  - match: Host(`frigate.blakeshome.com`)
+    kind: Rule
+    services:
+      - name: default-frigate
+        port: 5000
+    middlewares:
+      - name: traefik-forward-auth
+  tls:
+    certResolver: le
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: frigate
+  namespace: default
+spec:
+  chart:
+      git: https://github.com/blakeblackshear/billimek-charts
+      ref: master
+      path: charts/frigate
+  values:
+    replicaCount: 1
+
+    strategyType: Recreate
+
+    image:
+      repository: blakeblackshear/frigate
+      tag: 0.5.1
+      pullPolicy: IfNotPresent
+
+    extraSecretForEnvFrom:
+      - frigate-rtsp
+
+    timezone: America/Chicago
+
+    coral:
+      enabled: true
+      hostPath: /dev/bus/usb
+
+    shmSize: 500Mi
+
+    config: |
+      web_port: 5000
+
+      mqtt:
+        host: default-mosquitto
+        topic_prefix: frigate
+        client_id: frigate
+
+      ffmpeg:
+        hwaccel_args:
+          - -hwaccel
+          - vaapi
+          - -hwaccel_device
+          - /dev/dri/renderD128
+          - -hwaccel_output_format
+          - yuv420p
+
+      objects:
+        track:
+          - person
+          - car
+          - truck
+        filters:
+          person:
+            min_area: 2000
+            threshold: 0.5
+          car:
+            min_area: 4000
+          truck:
+            min_area: 4000
+
+      cameras:
+        back:
+          ffmpeg:
+            input: rtsp://viewer:{FRIGATE_BACK_PASSWORD}@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2
+          fps: 10
+          mask: back-mask.bmp
+
+    probes:
+      liveness:
+        initialDelaySeconds: 30
+        failureThreshold: 5
+        timeoutSeconds: 10
+      readiness:
+        initialDelaySeconds: 30
+        failureThreshold: 5
+        timeoutSeconds: 10
+
+    service:
+      port: 5000
+
+    ingress:
+      enabled: false

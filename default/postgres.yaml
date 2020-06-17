@@ -1,0 +1,34 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: postgres
+  namespace: default
+spec:
+  chart:
+    repository: https://charts.bitnami.com/bitnami
+    name: postgresql
+    version: 8.10.0
+  values:
+    image:
+      repository: bitnami/postgresql
+      tag: 11.8.0
+      debug: true
+    postgresqlDataDir: "/data/pgdata"
+    persistence:
+      enabled: true
+      mountPath: "/data/"
+      storageClass: longhorn-static
+    volumePermissions:
+      enabled: true
+    initdbScripts:
+      00-create-users-and-dbs.sql:
+        CREATE ROLE hass WITH LOGIN;
+
+        CREATE DATABASE hass;
+        ALTER DATABASE hass OWNER TO hass;
+    initdbScriptsSecret: postgres-init-secrets
+    livenessProbe:
+      enabled: false
+    readinessProbe:
+      enabled: false

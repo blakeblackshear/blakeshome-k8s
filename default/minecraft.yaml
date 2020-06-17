@@ -1,0 +1,75 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app: minecraft-creative
+  name: minecraft-creative
+spec:
+  replicas: 1
+  serviceName: minecraft-creative
+  selector:
+    matchLabels:
+      app: minecraft-creative
+  template:
+    metadata:
+      labels:
+        app: minecraft-creative
+    spec:
+      containers:
+        - name: main
+          image: itzg/minecraft-bedrock-server
+          volumeMounts:
+            - mountPath: /data
+              name: data
+          env:
+            - name: EULA
+              value: "TRUE"
+            - name: WHITE_LIST
+              value: "true"
+            - name: SERVER_NAME
+              value: "Luke's Server"
+            - name: GAMEMODE
+              value: "creative"
+          ports:
+            - containerPort: 19132
+              protocol: UDP
+          readinessProbe: &probe
+            exec:
+              command:
+                - mc-monitor
+                - status-bedrock
+                - --host
+                # force health check against IPv4 port
+                - 127.0.0.1
+            initialDelaySeconds: 30
+          livenessProbe: *probe
+          resources:
+            limits:
+              cpu: 2000m
+              memory: 500Mi
+            requests:
+              cpu: 50m
+              memory: 150Mi
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 5Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: minecraft-creative
+spec:
+  selector:
+    app: minecraft-creative
+  ports:
+    - port: 19132
+      protocol: UDP
+  ipFamily: IPv4
+  type: LoadBalancer

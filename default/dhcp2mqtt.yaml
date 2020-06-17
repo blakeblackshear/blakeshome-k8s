@@ -1,0 +1,29 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dhcp2mqtt
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: dhcp2mqtt
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: dhcp2mqtt
+    spec:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      containers:
+        - name: dhcp2mqtt
+          image: "blakeblackshear/dhcp2mqtt:1.0.0"
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: MQTT_HOST
+              value: "default-mosquitto"
+            - name: MACS_TO_MONITOR
+              value: "58:cb:52:14:ac:73,3c:28:6d:e3:ec:c4"

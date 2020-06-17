@@ -1,0 +1,65 @@
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: websockets
+  namespace: default
+spec:
+  headers:
+    customRequestHeaders:
+      X-Forwarded-Proto: "https"
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: unifi
+  namespace: default
+spec:
+  entryPoints:
+    - websecure
+  routes:
+  - match: Host(`unifi.blakeshome.com`)
+    kind: Rule
+    services:
+    - name: default-unifi-gui
+      port: 8443
+      scheme: https
+      insecureSkipVerify: true
+    middlewares:
+      - name: websockets
+        namespace: default
+  tls:
+    certResolver: le
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: unifi
+  namespace: default
+spec:
+  chart:
+    repository: https://kubernetes-charts.storage.googleapis.com
+    name: unifi
+    version: 0.7.0
+  values:
+    image:
+      repository: jacobalberty/unifi
+      tag: 5.12.72
+    persistence:
+      enabled: true
+      size: 10Gi
+      existingClaim: unifi
+    timezone: "America/Chicago"
+    runAsRoot: false
+    controllerService:
+      type: LoadBalancer
+    stunService:
+      type: LoadBalancer
+    discoveryService:
+      type: LoadBalancer
+    resources:
+      requests:
+        memory: 500Mi
+        cpu: 15m
+      limits:
+        memory: 1Gi

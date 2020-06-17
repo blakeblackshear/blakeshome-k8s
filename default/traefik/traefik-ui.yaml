@@ -1,0 +1,19 @@
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: traefik-ui
+spec:
+  entryPoints:
+    - websecure
+  routes:
+  - match: Host(`traefik.blakeshome.com`)
+    kind: Rule
+    services:
+      - name: api@internal
+        kind: TraefikService
+    middlewares:
+      - name: traefik-forward-auth
+        namespace: default
+  tls:
+    certResolver: le

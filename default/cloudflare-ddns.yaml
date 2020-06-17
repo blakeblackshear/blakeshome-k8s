@@ -1,0 +1,32 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloudflare-ddns
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cloudflare-ddns
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: cloudflare-ddns
+    spec:
+      containers:
+        - name: cloudflare-ddns
+          image: "oznu/cloudflare-ddns"
+          imagePullPolicy: Always
+          env:
+            - name: API_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: API_KEY
+                  name: cloudflare-ddns
+            - name: ZONE
+              value: "blakeshome.com"
+            - name: SUBDOMAIN
+              value: "dynamic"

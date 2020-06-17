@@ -1,0 +1,17 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: mosquitto
+  namespace: default
+spec:
+  chart:
+    repository: https://storage.googleapis.com/t3n-helm-charts
+    name: mosquitto
+    version: 0.1.1
+  values:
+    service:
+      type: LoadBalancer
+      externalTrafficPolicy: Local
+    persistence:
+      storageClass: local-path

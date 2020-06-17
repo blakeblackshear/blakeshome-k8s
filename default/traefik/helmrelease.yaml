@@ -1,0 +1,42 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: traefik
+  namespace: default
+spec:
+  chart:
+    repository: https://containous.github.io/traefik-helm-chart
+    name: traefik
+    version: 8.2.1
+  values:
+    persistence:
+      enabled: true
+      storageClass: local-path
+
+    envFrom:
+      - secretRef:
+          name: acme-cloudflare
+
+    additionalArguments:
+      - "--serversTransport.insecureSkipVerify=true"
+      - "--log.level=INFO"
+      - "--certificatesresolvers.le.acme.dnschallenge"
+      - "--certificatesresolvers.le.acme.dnschallenge.provider=cloudflare"
+      - "--certificatesresolvers.le.acme.dnschallenge.resolvers=1.1.1.1:53,8.8.8.8:53"
+      - "--certificatesresolvers.le.acme.email=blakeb@blakeshome.com"
+      - "--certificatesresolvers.le.acme.storage=/data/acme.json"
+
+    ports:
+      traefik:
+        port: 9000
+        expose: false
+        exposedPort: 9000
+      web:
+        port: 8000
+        expose: true
+        exposedPort: 80
+      websecure:
+        port: 8443
+        expose: true
+        exposedPort: 443
