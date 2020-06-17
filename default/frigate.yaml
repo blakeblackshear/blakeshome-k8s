@@ -89,13 +89,9 @@ spec:
 
     probes:
       liveness:
-        initialDelaySeconds: 30
-        failureThreshold: 5
-        timeoutSeconds: 10
+        enabled: false
       readiness:
-        initialDelaySeconds: 30
-        failureThreshold: 5
-        timeoutSeconds: 10
+        enabled: false
 
     service:
       port: 5000
