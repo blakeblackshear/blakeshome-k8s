@@ -38,8 +38,7 @@ spec:
       # example: query "printer.lan" or "my.printer.lan" will return 192.168.178.3
       customDNS:
         mapping:
-          blakeshome.com: 192.168.2.3
-          cameras.blakeshome.com: 192.168.2.2
+          blakeshome.com: 192.168.2.4
 
       # optional: definition, which DNS resolver should be used for queries to the domain (with all sub-domains).
       # Example: Query client.fritz.box will ask DNS server 192.168.178.1. This is necessary for local network, to resolve clients by host name
