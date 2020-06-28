@@ -1,11 +1,11 @@
 ## k3os setup
-1. Download ISO and install k3os (remaster ISO?)
+1. Download ISO and install k3os
 1. Configure static IP address (https://www.centlinux.com/2019/05/configure-network-on-k3os-machine.html)
     ```
     sudo connmanctl services
     sudo connmanctl config ethernet_681def0b1da9_cable --ipv4 manual 192.168.2.3 255.255.255.0 192.168.2.1 --nameservers 1.1.1.1
     ```
-1. Config to not deploy built in traefik
+1. Update `/var/lib/rancher/k3os/config.yaml` with [server config](k3os/config.yaml)
 
 ## Editing secrets
 Decrypt `env.gpg` with `gpg --decrypt env.gpg > env`.
@@ -15,7 +15,8 @@ Encrypt `env` with `gpg --symmetric --cipher-algo AES256 env`.
 ## Bootstrapping the cluster
 1. Create namespaces
    ```
-   kubectl create namespace longhorn-system flux
+   kubectl create namespace longhorn-system
+   kubectl create namespace flux
    ```
 1. Populate secrets
    ```
