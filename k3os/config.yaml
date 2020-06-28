@@ -1,0 +1,10 @@
+k3os:
+  k3s_args:
+  - server
+  - "--no-deploy"
+  - "traefik"
+  ntp_servers:
+  - 0.us.pool.ntp.org
+  - 1.us.pool.ntp.org
+ssh_authorized_keys:
+- github:blakeblackshear
