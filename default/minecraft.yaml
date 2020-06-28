@@ -55,6 +55,7 @@ spec:
     - metadata:
         name: data
       spec:
+        storageClassName: longhorn-static
         accessModes:
           - ReadWriteOnce
         resources:
