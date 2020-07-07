@@ -69,23 +69,24 @@ spec:
       objects:
         track:
           - person
-          - car
-          - truck
-        filters:
-          person:
-            min_area: 2000
-            threshold: 0.5
-          car:
-            min_area: 4000
-          truck:
-            min_area: 4000
 
       cameras:
         back:
           ffmpeg:
             input: rtsp://viewer:{FRIGATE_BACK_PASSWORD}@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2
-          fps: 10
-          mask: back-mask.bmp
+          objects:
+            filters:
+              person:
+                min_area: 2000
+                threshold: 0.8
+        front_door:
+          ffmpeg:
+            input: rtsp://viewer:{FRIGATE_BACK_PASSWORD}@10.0.10.118:554/cam/realmonitor?channel=1&subtype=2
+          objects:
+            filters:
+              person:
+                min_area: 15000
+                threshold: 0.8
 
     probes:
       liveness:
