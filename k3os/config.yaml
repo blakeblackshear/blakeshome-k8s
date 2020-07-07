@@ -1,3 +1,13 @@
+write_files:
+- content: |-
+    /dev/cdrom    /media/cdrom  iso9660 noauto,ro 0 0
+    /dev/usbdisk  /media/usb    vfat    noauto,ro 0 0
+    UUID=8200b18e-7943-4924-b458-81be1887602a /mnt/data xfs defaults 0 2
+  owner: root
+  path: /etc/fstab
+  permissions: '0644'
+boot_cmd:
+- "mkdir /mnt/data || echo data dir exists"
 k3os:
   k3s_args:
   - server
