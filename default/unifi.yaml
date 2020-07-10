@@ -40,11 +40,11 @@ spec:
   chart:
     repository: https://kubernetes-charts.storage.googleapis.com
     name: unifi
-    version: 0.7.0
+    version: 0.10.0
   values:
     image:
       repository: jacobalberty/unifi
-      tag: 5.12.72
+      tag: 5.13.32
     persistence:
       enabled: true
       size: 10Gi
