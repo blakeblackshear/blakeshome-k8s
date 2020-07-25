@@ -14,7 +14,7 @@ spec:
 
     image:
       repository: spx01/blocky
-      tag: v0.7
+      tag: v0.9.1
       pullPolicy: IfNotPresent
 
     nameOverride: ""

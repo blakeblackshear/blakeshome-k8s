@@ -31,6 +31,8 @@ spec:
               value: "Luke's Server"
             - name: GAMEMODE
               value: "creative"
+            - name: DIFFICULTY
+              value: "peaceful"
           ports:
             - containerPort: 19132
               protocol: UDP

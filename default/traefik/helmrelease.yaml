@@ -8,7 +8,7 @@ spec:
   chart:
     repository: https://containous.github.io/traefik-helm-chart
     name: traefik
-    version: 8.2.1
+    version: 8.9.1
   values:
     persistence:
       enabled: true

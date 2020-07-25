@@ -48,7 +48,7 @@ spec:
   values:
     image:
       repository: homeassistant/home-assistant
-      tag: 0.112.3
+      tag: 0.113.1
     persistence:
       enabled: true
       size: 2Gi
@@ -71,5 +71,5 @@ spec:
         port: 8124
       image:
         repository: codercom/code-server
-        tag: 3.3.1
+        tag: 3.4.1
         pullPolicy: IfNotPresent

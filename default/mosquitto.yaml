@@ -8,7 +8,7 @@ spec:
   chart:
     repository: https://storage.googleapis.com/t3n-helm-charts
     name: mosquitto
-    version: 0.1.1
+    version: 1.0.0
   values:
     service:
       type: LoadBalancer
