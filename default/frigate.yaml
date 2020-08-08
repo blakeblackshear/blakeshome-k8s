@@ -35,8 +35,7 @@ spec:
 
     image:
       repository: blakeblackshear/frigate
-      tag: 0.5.1
-      pullPolicy: IfNotPresent
+      tag: 0.6.0-rc1
 
     extraSecretForEnvFrom:
       - frigate-rtsp
@@ -46,6 +45,10 @@ spec:
     coral:
       enabled: true
       hostPath: /dev/bus/usb
+
+    clips:
+      enabled: true
+      existingClaim: nvr-clips
 
     shmSize: 500Mi
 
@@ -74,6 +77,12 @@ spec:
         back:
           ffmpeg:
             input: rtsp://viewer:{FRIGATE_BACK_PASSWORD}@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2
+          width: 1920
+          height: 1080
+          save_clips:
+            enabled: True
+          snapshots:
+            draw_zones: true
           objects:
             filters:
               person:
@@ -82,11 +91,52 @@ spec:
         front_door:
           ffmpeg:
             input: rtsp://viewer:{FRIGATE_BACK_PASSWORD}@10.0.10.118:554/cam/realmonitor?channel=1&subtype=2
+          height: 1920
+          width: 1080
+          save_clips:
+            enabled: True
+          snapshots:
+            draw_zones: true
           objects:
             filters:
               person:
-                min_area: 15000
+                min_area: 20000
                 threshold: 0.8
+      
+      zones:
+        yard:
+          back:
+            coordinates:
+              - 545,1077
+              - 747,939
+              - 788,805
+              - 832,687
+              - 893,573
+              - 908,544
+              - 1383,495
+              - 1534,473
+              - 1583,470
+              - 1663,492
+              - 1648,710
+              - 1616,771
+              - 1599,885
+              - 1607,936
+              - 1822,1078
+            filters:
+              person:
+                min_area: 5000
+                max_area: 100000
+                threshold: 0.85
+        driveway:
+          back:
+            coordinates: 1,1077,3,699,66,699,88,693,307,693,317,709,356,699,390,670,424,653,500,641,588,649,700,631,729,676,771,704,798,739,720,917,508,1046,369,1073
+        front_porch:
+          front_door:
+            coordinates: 1,1065,312,1059,647,927,708,847,748,843,1001,863,1005,960,1033,1169,1078,1174,1080,1251,1079,1918,2,1919
+            filters:
+              person:
+                min_area: 50000
+                threshold: 0.85
 
     probes:
       liveness:
