@@ -49,9 +49,9 @@ metadata:
   namespace: longhorn-system
 spec:
   chart:
-    git: https://github.com/longhorn/longhorn
-    ref: v0.8.1
-    path: chart
+    repository: https://charts.longhorn.io
+    name: longhorn
+    version: 1.0.1
   values:
     defaultSettings:
       backupTarget: s3://blakeshome-longhorn-backuptarget@us-east-2/
