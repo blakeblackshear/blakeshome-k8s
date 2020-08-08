@@ -1,0 +1,73 @@
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: filebrowser
+  namespace: default
+spec:
+  entryPoints:
+    - websecure
+  routes:
+  - match: Host(`files.blakeshome.com`)
+    kind: Rule
+    services:
+      - name: filebrowser
+        port: 80
+    middlewares:
+      - name: traefik-forward-auth
+  tls:
+    certResolver: le
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: filebrowser
+  labels:
+    app.kubernetes.io/name: filebrowser
+spec:
+  type: ClusterIP
+  publishNotReadyAddresses: false
+  ports:
+    - name: filebrowser
+      port: 80
+      protocol: TCP
+      targetPort: 80
+
+  selector:
+    app.kubernetes.io/name: filebrowser
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: filebrowser
+  labels:
+    app.kubernetes.io/name: filebrowser
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: filebrowser
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: filebrowser
+    spec:
+      containers:
+        - name: filebrowser
+          image: "filebrowser/filebrowser:v2.6.2-alpine"
+          imagePullPolicy: IfNotPresent
+          args:
+            - --noauth
+          ports:
+            - name: filebrowser
+              containerPort: 80
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /srv
+              name: media
+      volumes:
+      - name: media
+        persistentVolumeClaim:
+          claimName: media
