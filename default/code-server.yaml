@@ -1,0 +1,82 @@
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: code-server
+  namespace: default
+spec:
+  entryPoints:
+    - websecure
+  routes:
+  - match: Host(`code.blakeshome.com`)
+    kind: Rule
+    services:
+      - name: code-server
+        port: 8124
+    middlewares:
+      - name: traefik-forward-auth
+  tls:
+    certResolver: le
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: code-server
+  labels:
+    app.kubernetes.io/name: code-server
+spec:
+  type: ClusterIP
+  publishNotReadyAddresses: false
+  ports:
+    - name: vscode
+      port: 8124
+      protocol: TCP
+      targetPort: 8124
+
+  selector:
+    app.kubernetes.io/name: code-server
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: code-server
+  labels:
+    app.kubernetes.io/name: code-server
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: code-server
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: code-server
+    spec:
+      containers:
+        - name: vscode
+          image: "codercom/code-server:3.4.1"
+          imagePullPolicy: IfNotPresent
+          workingDir: /config
+          args:
+            - --port=8124
+            - --auth=none
+            - --extensions-dir=/config/.vscode
+            - --user-data-dir=/config/.vscode
+            - /config
+          ports:
+            - name: vscode
+              containerPort: 8124
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /config
+              name: config
+          securityContext:
+            runAsUser: 0
+          resources:
+            null
+      volumes:
+      - name: config
+        persistentVolumeClaim:
+          claimName: homeassistant
