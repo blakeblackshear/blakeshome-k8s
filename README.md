@@ -24,7 +24,7 @@ Encrypt `env` with `gpg --symmetric --cipher-algo AES256 env`.
    ```
 1. [Install Flux Helm Operator](https://docs.fluxcd.io/projects/helm-operator/en/stable/get-started/quickstart/#install-the-helm-operator)
    ```
-   kubectl apply -f https://raw.githubusercontent.com/fluxcd/helm-operator/1.1.0/deploy/crds.yaml
+   kubectl apply -f https://raw.githubusercontent.com/fluxcd/helm-operator/1.2.0/deploy/crds.yaml
    helm repo add fluxcd https://charts.fluxcd.io
    helm upgrade -i helm-operator fluxcd/helm-operator \
     --namespace flux \
@@ -44,7 +44,7 @@ Encrypt `env` with `gpg --symmetric --cipher-algo AES256 env`.
    ```
    kubectl apply -f longhorn-system/longhorn.yaml
    ```
-1. Restore volumes and create PV/PVC in longhorn UI
+1. Restore volumes and/or create PV/PVC in longhorn UI
 1. Apply other configs
    ```
    kubectl apply -f default/
