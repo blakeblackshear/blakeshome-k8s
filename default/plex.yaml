@@ -1,0 +1,75 @@
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: media
+spec:
+  capacity:
+    storage: 2500Gi
+  volumeMode: Filesystem
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-storage
+  local:
+    path: /mnt/data2
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - k3os-7155
+---
+  apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    name: media
+  spec:
+    storageClassName: local-storage
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 2500Gi
+    volumeName: "media"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: plex
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: plex
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: plex
+    spec:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      volumes:
+        - name: media
+          persistentVolumeClaim:
+            claimName: media
+        - name: database
+          persistentVolumeClaim:
+            claimName: plex-database
+      containers:
+        - name: pms-server
+          image: "plexinc/pms-docker:1.19.5.3112-b23ab3896"
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: TZ
+              value: America/Chicago
+          volumeMounts:
+            - mountPath: /data
+              name: media
+            - mountPath: /config
+              name: database
