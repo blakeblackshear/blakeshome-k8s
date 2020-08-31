@@ -65,9 +65,14 @@ spec:
               containerPort: 80
               protocol: TCP
           volumeMounts:
-            - mountPath: /srv
+            - mountPath: /srv/media
               name: media
+            - mountPath: /srv/minecraft
+              name: minecraft
       volumes:
-      - name: media
-        persistentVolumeClaim:
-          claimName: media
+        - name: media
+          persistentVolumeClaim:
+            claimName: media
+        - name: minecraft
+          persistentVolumeClaim:
+            claimName: data-minecraft-creative-0

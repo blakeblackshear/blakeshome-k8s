@@ -7,9 +7,10 @@ kubectl create secret generic cloudflare-ddns \
 kubectl create secret generic acme-cloudflare \
     --from-literal=CLOUDFLARE_EMAIL="${CLOUDFLARE_ACME_EMAIL}" \
     --from-literal=CLOUDFLARE_API_KEY="${CLOUDFLARE_ACME_KEY}"
-kubectl -n longhorn-system create secret generic aws-secret \
-    --from-literal=AWS_ACCESS_KEY_ID="${LONGHORN_AWS_ACCESS_KEY_ID}" \
-    --from-literal=AWS_SECRET_ACCESS_KEY="${LONGHORN_AWS_SECRET_ACCESS_KEY}"
+kubectl create secret generic restic-secrets \
+    --from-literal=AWS_ACCESS_KEY_ID="${RESTIC_AWS_ACCESS_KEY_ID}" \
+    --from-literal=AWS_SECRET_ACCESS_KEY="${RESTIC_AWS_SECRET_ACCESS_KEY}" \
+    --from-literal=RESTIC_PASSWORD="${RESTIC_PASSWORD}"
 kubectl create secret generic traefik-forward-auth-secrets \
     --from-literal=traefik-forward-auth-google-client-id="${GOOGLE_CLIENT_ID}" \
     --from-literal=traefik-forward-auth-google-client-secret="${GOOGLE_CLIENT_SECRET}" \

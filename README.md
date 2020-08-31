@@ -15,7 +15,6 @@ Encrypt `env` with `gpg --symmetric --cipher-algo AES256 env`.
 ## Bootstrapping the cluster
 1. Create namespaces
    ```
-   kubectl create namespace longhorn-system
    kubectl create namespace flux
    ```
 1. Populate secrets
@@ -30,6 +29,19 @@ Encrypt `env` with `gpg --symmetric --cipher-algo AES256 env`.
     --namespace flux \
     --set helm.versions=v3
    ```
+1. Create volumes
+   ```
+   kubectl apply -f default/volumes/pvc.yaml
+   kubectl apply -f default/volumes/restorejobs.yaml
+   ```
+1. Restore volumes and wait for them to finish
+   ```
+   kubectl create job --from=cronjob/esphome-restic-restore esphome-restore
+   kubectl create job --from=cronjob/homeassistant-restic-restore homeassistant-restore
+   kubectl create job --from=cronjob/minecraft-restic-restore minecraft-restore
+   kubectl create job --from=cronjob/plex-restic-restore plex-restore
+   kubectl create job --from=cronjob/qbittorrent-restic-restore qbittorrent-restore
+   ```
 1. Install traefik
    ```
    kubectl apply -f default/traefik/helmrelease.yaml
@@ -40,11 +52,6 @@ Encrypt `env` with `gpg --symmetric --cipher-algo AES256 env`.
    # ensure you wait until the let's encrypt cert was obtained
    kubectl apply -f default/traefik/traefik-ui.yaml
    ```
-1. Install longhorn
-   ```
-   kubectl apply -f longhorn-system/longhorn.yaml
-   ```
-1. Restore volumes and/or create PV/PVC in longhorn UI
 1. Apply other configs
    ```
    kubectl apply -f default/

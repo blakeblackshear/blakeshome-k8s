@@ -196,7 +196,7 @@ metadata:
 spec:
   concurrencyPolicy: Forbid
   schedule: "23 * * * *"
-  suspend: true
+  suspend: false
   jobTemplate:
     spec:
       template:
@@ -461,6 +461,7 @@ metadata:
 spec:
   selector:
     app.kubernetes.io/name: nvr
+  publishNotReadyAddresses: true
   ports:
     - protocol: TCP
       port: 80

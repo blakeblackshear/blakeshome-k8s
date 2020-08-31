@@ -1,0 +1,83 @@
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: qbittorrent
+  namespace: default
+spec:
+  entryPoints:
+    - websecure
+  routes:
+  - match: Host(`torrents.blakeshome.com`)
+    kind: Rule
+    services:
+      - name: qbittorrent
+        port: 8080
+    middlewares:
+      - name: traefik-forward-auth
+  tls:
+    certResolver: le
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: qbittorrent
+  labels:
+    app.kubernetes.io/name: qbittorrent
+spec:
+  type: ClusterIP
+  publishNotReadyAddresses: false
+  ports:
+    - name: qbittorrent
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+
+  selector:
+    app.kubernetes.io/name: qbittorrent
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qbittorrent
+  labels:
+    app.kubernetes.io/name: qbittorrent
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: qbittorrent
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: qbittorrent
+    spec:
+      containers:
+        - name: qbittorrent
+          image: "linuxserver/qbittorrent:latest"
+          imagePullPolicy: Always
+          env:
+            - name: PUID
+              value: '1000'
+            - name: PGID
+              value: '1000'
+            - name: TZ
+              value: America/Chicago
+          ports:
+            - name: qbittorrent
+              containerPort: 8080
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /downloads
+              name: media
+            - mountPath: /config
+              name: qbittorrent
+      volumes:
+        - name: media
+          persistentVolumeClaim:
+            claimName: media
+        - name: qbittorrent
+          persistentVolumeClaim:
+            claimName: qbittorrent

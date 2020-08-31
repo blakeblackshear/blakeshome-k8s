@@ -33,6 +33,10 @@ spec:
               value: "creative"
             - name: DIFFICULTY
               value: "peaceful"
+            - name: ALLOW_CHEATS
+              value: "true"
+            - name: DEFAULT_PLAYER_PERMISSION_LEVEL
+              value: "member"
           ports:
             - containerPort: 19132
               protocol: UDP

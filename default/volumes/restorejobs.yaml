@@ -1,0 +1,210 @@
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: esphome-restic-restore
+spec:
+  concurrencyPolicy: Forbid
+  schedule: "0 0 * * *"
+  suspend: true
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          hostname: esphome
+          volumes:
+            - name: esphome
+              persistentVolumeClaim:
+                claimName: esphome
+          containers:
+          - name: restore
+            image: restic/restic
+            args:
+            - "--repo"
+            - "s3:s3.amazonaws.com/blakeshome-restic-backups"
+            - "--verbose"
+            - "--verbose"
+            - "restore"
+            - "latest"
+            - "--host"
+            - "esphome"
+            - "--target"
+            - "/"
+            volumeMounts:
+            - mountPath: "/data"
+              name: esphome
+            envFrom:
+            - secretRef:
+                name: restic-secrets
+            env:
+            - name: AWS_DEFAULT_REGION
+              value: us-east-2
+          restartPolicy: OnFailure
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: homeassistant-restic-restore
+spec:
+  concurrencyPolicy: Forbid
+  schedule: "0 0 * * *"
+  suspend: true
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          hostname: homeassistant
+          volumes:
+            - name: homeassistant
+              persistentVolumeClaim:
+                claimName: homeassistant
+          containers:
+          - name: restore
+            image: restic/restic
+            args:
+            - "--repo"
+            - "s3:s3.amazonaws.com/blakeshome-restic-backups"
+            - "--verbose"
+            - "--verbose"
+            - "restore"
+            - "latest"
+            - "--host"
+            - "homeassistant"
+            - "--target"
+            - "/"
+            volumeMounts:
+            - mountPath: "/data"
+              name: homeassistant
+            envFrom:
+            - secretRef:
+                name: restic-secrets
+            env:
+            - name: AWS_DEFAULT_REGION
+              value: us-east-2
+          restartPolicy: OnFailure
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: minecraft-restic-restore
+spec:
+  concurrencyPolicy: Forbid
+  schedule: "0 0 * * *"
+  suspend: true
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          hostname: minecraft
+          volumes:
+            - name: minecraft
+              persistentVolumeClaim:
+                claimName: data-minecraft-creative-0
+          containers:
+          - name: restore
+            image: restic/restic
+            args:
+            - "--repo"
+            - "s3:s3.amazonaws.com/blakeshome-restic-backups"
+            - "--verbose"
+            - "--verbose"
+            - "restore"
+            - "latest"
+            - "--host"
+            - "minecraft"
+            - "--target"
+            - "/"
+            volumeMounts:
+            - mountPath: "/data"
+              name: minecraft
+            envFrom:
+            - secretRef:
+                name: restic-secrets
+            env:
+            - name: AWS_DEFAULT_REGION
+              value: us-east-2
+          restartPolicy: OnFailure
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: plex-restic-restore
+spec:
+  concurrencyPolicy: Forbid
+  schedule: "0 0 * * *"
+  suspend: true
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          hostname: plex
+          volumes:
+            - name: plex-database
+              persistentVolumeClaim:
+                claimName: plex-database
+          containers:
+          - name: restore
+            image: restic/restic
+            args:
+            - "--repo"
+            - "s3:s3.amazonaws.com/blakeshome-restic-backups"
+            - "--verbose"
+            - "--verbose"
+            - "restore"
+            - "latest"
+            - "--host"
+            - "plex"
+            - "--target"
+            - "/"
+            volumeMounts:
+            - mountPath: "/data"
+              name: plex-database
+            envFrom:
+            - secretRef:
+                name: restic-secrets
+            env:
+            - name: AWS_DEFAULT_REGION
+              value: us-east-2
+          restartPolicy: OnFailure
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: qbittorrent-restic-restore
+spec:
+  concurrencyPolicy: Forbid
+  schedule: "0 0 * * *"
+  suspend: true
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          hostname: qbittorrent
+          volumes:
+            - name: qbittorrent
+              persistentVolumeClaim:
+                claimName: qbittorrent
+          containers:
+          - name: restore
+            image: restic/restic
+            args:
+            - "--repo"
+            - "s3:s3.amazonaws.com/blakeshome-restic-backups"
+            - "--verbose"
+            - "--verbose"
+            - "restore"
+            - "latest"
+            - "--host"
+            - "qbittorrent"
+            - "--target"
+            - "/"
+            volumeMounts:
+            - mountPath: "/data"
+              name: qbittorrent
+            envFrom:
+            - secretRef:
+                name: restic-secrets
+            env:
+            - name: AWS_DEFAULT_REGION
+              value: us-east-2
+          restartPolicy: OnFailure
