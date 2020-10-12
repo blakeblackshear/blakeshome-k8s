@@ -25,7 +25,7 @@ spec:
   values:
     image:
       repository: bitnami/postgresql
-      tag: 11.8.0
+      tag: 11.9.0
       debug: true
     postgresqlDataDir: "/data/pgdata"
     persistence:
@@ -34,13 +34,13 @@ spec:
       storageClass: longhorn-static
     volumePermissions:
       enabled: true
-    initdbScripts:
-      00-create-users-and-dbs.sql:
-        CREATE ROLE hass WITH LOGIN;
+    # initdbScripts:
+    #   00-create-users-and-dbs.sql:
+    #     CREATE ROLE hass WITH LOGIN;
 
-        CREATE DATABASE hass;
-        ALTER DATABASE hass OWNER TO hass;
-    initdbScriptsSecret: postgres-init-secrets
+    #     CREATE DATABASE hass;
+    #     ALTER DATABASE hass OWNER TO hass;
+    # initdbScriptsSecret: postgres-init-secrets
     livenessProbe:
       enabled: false
     readinessProbe:

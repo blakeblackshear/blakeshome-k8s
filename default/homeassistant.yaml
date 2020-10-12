@@ -23,13 +23,13 @@ metadata:
   namespace: default
 spec:
   chart:
-    repository: https://billimek.com/billimek-charts/
+    repository: https://k8s-at-home.com/charts/
     name: home-assistant
-    version: 1.0.5
+    version: 2.5.1
   values:
     image:
       repository: homeassistant/home-assistant
-      tag: 0.114.0
+      tag: 0.116.2
     persistence:
       enabled: true
       size: 2Gi
@@ -46,3 +46,10 @@ spec:
       requests:
         cpu: 35m
         memory: 2000Mi
+    extraVolumes:
+      - name: nvr
+        persistentVolumeClaim:
+          claimName: nvr
+    extraVolumeMounts:
+      - mountPath: /media
+        name: nvr

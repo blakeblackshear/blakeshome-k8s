@@ -56,7 +56,7 @@ spec:
     spec:
       containers:
         - name: vscode
-          image: "codercom/code-server:3.4.1"
+          image: "codercom/code-server:3.6.0"
           imagePullPolicy: IfNotPresent
           workingDir: /config
           args:
