@@ -194,7 +194,7 @@ metadata:
   name: unifi-restic-backups
 spec:
   concurrencyPolicy: Forbid
-  schedule: "29 * * * *"
+  schedule: "0 12 * * *"
   suspend: false
   jobTemplate:
     spec:
@@ -219,6 +219,38 @@ spec:
             - mountPath: "/data"
               name: unifi
               subPath: "data/backup/autobackup"
+            envFrom:
+            - secretRef:
+                name: restic-secrets
+            env:
+            - name: AWS_DEFAULT_REGION
+              value: us-east-2
+          restartPolicy: OnFailure
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: restic-backup-cleanup
+spec:
+  concurrencyPolicy: Forbid
+  schedule: "13 11 * * *"
+  suspend: false
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          hostname: restic
+          containers:
+          - name: backup
+            image: restic/restic
+            args:
+            - "--repo"
+            - "s3:s3.amazonaws.com/blakeshome-restic-backups"
+            - "--verbose"
+            - "forget"
+            - "--prune"
+            - "--keep-last"
+            - "5"
             envFrom:
             - secretRef:
                 name: restic-secrets
