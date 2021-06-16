@@ -72,12 +72,17 @@ spec:
           volumeMounts:
             - mountPath: /downloads
               name: media
+            - mountPath: /downloads2
+              name: media2
             - mountPath: /config
               name: qbittorrent
       volumes:
         - name: media
           persistentVolumeClaim:
             claimName: media
+        - name: media2
+          persistentVolumeClaim:
+            claimName: media2
         - name: qbittorrent
           persistentVolumeClaim:
             claimName: qbittorrent

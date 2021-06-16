@@ -1,4 +1,40 @@
 ---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: frigate
+spec:
+  capacity:
+    storage: 900Gi
+  volumeMode: Filesystem
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-storage
+  local:
+    path: /mnt/data/frigate
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - k3os-7155
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: frigate
+spec:
+  storageClassName: local-storage
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 900Gi
+  volumeName: "frigate"
+---
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
@@ -35,7 +71,7 @@ spec:
 
     image:
       repository: blakeblackshear/frigate
-      tag: 0.6.0-rc1
+      tag: 0.8.4-amd64
 
     extraSecretForEnvFrom:
       - frigate-rtsp
@@ -46,20 +82,23 @@ spec:
       enabled: true
       hostPath: /dev/bus/usb
 
-    clips:
-      enabled: true
-      existingClaim: nvr-clips
+    extraVolumes:
+      - name: frigate
+        persistentVolumeClaim:
+          claimName: frigate
+
+    extraVolumeMounts:
+      - mountPath: /media/frigate
+        name: frigate
 
     shmSize: 500Mi
 
     config: |
-      web_port: 5000
-
       mqtt:
         host: default-mosquitto
         topic_prefix: frigate
         client_id: frigate
-
+      
       ffmpeg:
         hwaccel_args:
           - -hwaccel
@@ -68,75 +107,85 @@ spec:
           - /dev/dri/renderD128
           - -hwaccel_output_format
           - yuv420p
-
-      objects:
-        track:
-          - person
-
+      
       cameras:
         back:
           ffmpeg:
-            input: rtsp://viewer:{FRIGATE_BACK_PASSWORD}@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2
+            inputs: 
+              - path: rtsp://viewer:{FRIGATE_BACK_PASSWORD}@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2
+                roles:
+                  - detect
+                  - rtmp
+              - path: rtsp://viewer:{FRIGATE_BACK_PASSWORD}@10.0.10.10:554/live
+                roles:
+                  - clips
+                  - record
           width: 1920
           height: 1080
-          save_clips:
+          motion:
+            mask:
+              - 1855,38,1851,100,1305,101,1304,43
+          record:
             enabled: True
+            retain_days: 14
+          clips:
+            enabled: True
+            pre_capture: 3
+            retain:
+              default : 14
           snapshots:
-            draw_zones: true
+            enabled: True
+          best_image_timeout: 10
+          zones:
+            yard:
+              coordinates: 907,229,1551,193,1641,210,1670,232,1653,420,1624,502,1609,556,1593,683,1577,778,1705,848,1748,917,1789,1075,0,1078,14,951,584,744,747,637,795,483
+              filters:
+                person:
+                  min_area: 5000
+                  max_area: 100000
+            driveway:
+              coordinates: 1,429,74,393,174,312,293,303,484,273,730,239,744,378,773,422,720,531,622,673,279,824,3,912
           objects:
             filters:
               person:
                 min_area: 2000
-                threshold: 0.8
         front_door:
           ffmpeg:
-            input: rtsp://viewer:{FRIGATE_BACK_PASSWORD}@10.0.10.118:554/cam/realmonitor?channel=1&subtype=2
+            inputs: 
+              - path: rtsp://viewer:{FRIGATE_BACK_PASSWORD}@10.0.10.118:554/cam/realmonitor?channel=1&subtype=2
+                roles:
+                  - detect
+                  - rtmp
+              - path: rtsp://viewer:{FRIGATE_BACK_PASSWORD}@10.0.10.118:554/live
+                roles:
+                  - clips
+                  - record
           height: 1920
           width: 1080
-          save_clips:
+          motion:
+            mask:
+              - 1078,5,1074,276,8,313,8,9
+          record:
             enabled: True
+            retain_days: 14
+          clips:
+            enabled: True
+            pre_capture: 3
+            retain:
+              default : 14
           snapshots:
-            draw_zones: true
+            enabled: True
+          best_image_timeout: 10
+          zones:
+            front_porch:
+              coordinates: 1,1065,312,1059,647,927,708,847,748,843,1001,863,1005,960,1033,1169,1078,1174,1080,1251,1079,1918,2,1919
+              filters:
+                person:
+                  min_area: 50000
           objects:
             filters:
               person:
                 min_area: 20000
-                threshold: 0.8
-      
-      zones:
-        yard:
-          back:
-            coordinates:
-              - 545,1077
-              - 747,939
-              - 788,805
-              - 832,687
-              - 893,573
-              - 908,544
-              - 1383,495
-              - 1534,473
-              - 1583,470
-              - 1663,492
-              - 1648,710
-              - 1616,771
-              - 1599,885
-              - 1607,936
-              - 1822,1078
-            filters:
-              person:
-                min_area: 5000
-                max_area: 100000
-                threshold: 0.85
-        driveway:
-          back:
-            coordinates: 1,1077,3,699,66,699,88,693,307,693,317,709,356,699,390,670,424,653,500,641,588,649,700,631,729,676,771,704,798,739,720,917,508,1046,369,1073
-        front_porch:
-          front_door:
-            coordinates: 1,1065,312,1059,647,927,708,847,748,843,1001,863,1005,960,1033,1169,1078,1174,1080,1251,1079,1918,2,1919
-            filters:
-              person:
-                min_area: 50000
-                threshold: 0.85
 
     probes:
       liveness:

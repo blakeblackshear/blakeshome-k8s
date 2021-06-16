@@ -48,25 +48,19 @@ spec:
 
       # optional: use black and white lists to block queries (for example ads, trackers, adult pages etc.)
       blocking:
-        # definition of blacklist groups. Can be external link (http/https) or local file
         blackLists:
           ads:
-            - https://s3.amazonaws.com/lists.disconnect.me/simple_ad.txt
-            - https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
-            - https://mirror1.malwaredomains.com/files/justdomains
-            - http://sysctl.org/cameleon/hosts
-            - https://zeustracker.abuse.ch/blocklist.php?download=domainblocklist
-            - https://s3.amazonaws.com/lists.disconnect.me/simple_tracking.txt
-          special: []
-            # - https://hosts-file.net/ad_servers.txt
-        # definition of whitelist groups. Attention: if the same group has black and whitelists,
-        # whitelists will be used to disable particular blacklist entries. If a group has only
-        # whitelist entries -> this means only domains from this list are allowed,
-        # all other domains will be blocked.
-        # Also see the extraLists section below to add your own in-line whitelists
+          - https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
+          - https://s3.amazonaws.com/lists.disconnect.me/simple_ad.txt
+          - https://mirror1.malwaredomains.com/files/justdomains
+          - http://sysctl.org/cameleon/hosts
+          - https://zeustracker.abuse.ch/blocklist.php?download=domainblocklist
+          - https://s3.amazonaws.com/lists.disconnect.me/simple_tracking.txt
+          kids:
+          - https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews-gambling-porn/hosts
         whiteLists:
           ads:
-            - https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/whitelist.txt
+          - https://raw.githubusercontent.com/chadmayfield/my-pihole-blocklists/master/white.list
         # definition: which groups should be applied for which client
         clientGroupsBlock:
           # default will be used, if no special definition for a client name exists
@@ -76,6 +70,10 @@ spec:
           # use client name or ip address
           192.168.2.160: [] # ali_phone
           192.168.2.156: [] # ali_computer
+          192.168.2.155: # luke_computer
+            - ads
+            - kids
+
 
         # which response will be sent, if query is blocked:
         #   zeroIp: 0.0.0.0 will be returned (default)

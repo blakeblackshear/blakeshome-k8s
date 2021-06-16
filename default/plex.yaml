@@ -22,18 +22,54 @@ spec:
           values:
           - k3os-7155
 ---
-  apiVersion: v1
-  kind: PersistentVolumeClaim
-  metadata:
-    name: media
-  spec:
-    storageClassName: local-storage
-    accessModes:
-    - ReadWriteOnce
-    resources:
-      requests:
-        storage: 2500Gi
-    volumeName: "media"
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: media
+spec:
+  storageClassName: local-storage
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2500Gi
+  volumeName: "media"
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: media2
+spec:
+  capacity:
+    storage: 8500Gi
+  volumeMode: Filesystem
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-storage
+  local:
+    path: /mnt/data3
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - k3os-7155
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: media2
+spec:
+  storageClassName: local-storage
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 8500Gi
+  volumeName: "media2"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -58,12 +94,15 @@ spec:
         - name: media
           persistentVolumeClaim:
             claimName: media
+        - name: media2
+          persistentVolumeClaim:
+            claimName: media2
         - name: database
           persistentVolumeClaim:
             claimName: plex-database
       containers:
         - name: pms-server
-          image: "plexinc/pms-docker:1.20.2.3402-0fec14d92"
+          image: "plexinc/pms-docker:1.23.2.4656-85f0adf5b"
           imagePullPolicy: IfNotPresent
           env:
             - name: TZ
@@ -71,5 +110,7 @@ spec:
           volumeMounts:
             - mountPath: /data
               name: media
+            - mountPath: /media/external
+              name: media2
             - mountPath: /config
               name: database
