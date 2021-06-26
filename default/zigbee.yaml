@@ -1,0 +1,39 @@
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: zigbee
+  namespace: default
+spec:
+  entryPoints:
+    - websecure
+  routes:
+  - match: Host(`zigbee.blakeshome.com`)
+    kind: Rule
+    services:
+      - name: zigbee
+        port: 8080
+    middlewares:
+      - name: traefik-forward-auth
+  tls:
+    certResolver: le
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: zigbee
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8080
+    targetPort: 8080
+---
+kind: Endpoints
+apiVersion: v1
+metadata:
+  name: zigbee
+subsets:
+  - addresses:
+      - ip: 192.168.2.213
+    ports:
+      - port: 8080

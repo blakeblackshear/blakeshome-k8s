@@ -38,13 +38,13 @@ metadata:
   namespace: default
 spec:
   chart:
-    repository: https://kubernetes-charts.storage.googleapis.com
+    repository: https://k8s-at-home.com/charts/
     name: unifi
-    version: 0.10.0
+    version: 2.0.4
   values:
     image:
       repository: jacobalberty/unifi
-      tag: 5.13.32
+      tag: v6.2.26
     persistence:
       enabled: true
       size: 10Gi
