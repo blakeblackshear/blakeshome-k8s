@@ -6,34 +6,67 @@ metadata:
   namespace: default
 spec:
   chart:
-    repository: https://billimek.com/billimek-charts/
+    repository: https://k8s-at-home.com/charts/
     name: blocky
-    version: 3.1.1
-  values:
-    replicaCount: 1
+    version: 7.1.0
 
+  values:
     image:
-      repository: spx01/blocky
+      repository: ghcr.io/0xerr0r/blocky
       tag: v0.14
       pullPolicy: IfNotPresent
 
-    nameOverride: ""
-    fullnameOverride: ""
+    env:
+      TZ: "America/Chicago"
 
-    replicas: 1
+    service:
+      main:
+        ports:
+          http:
+            port: 4000
+      dns-tcp:
+        enabled: true
+        type: LoadBalancer
+        loadBalancerIP: ""
+        ports:
+          dns-tcp:
+            enabled: true
+            port: 53
+            protocol: TCP
+            targetPort: 53
+        externalTrafficPolicy: Local
+        annotations: {}
+      dns-udp:
+        enabled: true
+        type: LoadBalancer
+        loadBalancerIP: ""
+        ports:
+          dns-udp:
+            enabled: true
+            port: 53
+            protocol: UDP
+            targetPort: 53
+        externalTrafficPolicy: Local
+        annotations: {}
 
-    timeZone: "America/Chicago"
+    # Probes configuration
+    probes:
+      liveness:
+        enabled: false
+      readiness:
+        enabled: false
+      startup:
+        enabled: false
 
     # blocky configuration - will translate to config.yml file inside the pod
-    config:
+    config: |
       upstream:
-        # these external DNS resolvers will be used. Blocky picks 2 random resolvers from the list for each query
-        # format for resolver: net:host:[port][/path]. net could be tcp, udp, tcp-tls or https (DoH). If port is empty, default port will be used (53 for udp and tcp, 853 for tcp-tls, 443 for https (Doh))
-        externalResolvers:
-          - udp:8.8.8.8
-          - udp:8.8.4.4
-          - udp:1.1.1.1
-
+        default:
+        - tcp+udp:8.8.8.8
+        - tcp+udp:8.8.4.4
+        - tcp+udp:1.1.1.1
+        - tcp-tls:1.0.0.1:853
+        - https://cloudflare-dns.com/dns-query
       # optional: custom IP address for domain name (with all sub-domains)
       # example: query "printer.lan" or "my.printer.lan" will return 192.168.178.3
       customDNS:
@@ -52,15 +85,15 @@ spec:
           ads:
           - https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
           - https://s3.amazonaws.com/lists.disconnect.me/simple_ad.txt
-          - https://mirror1.malwaredomains.com/files/justdomains
           - http://sysctl.org/cameleon/hosts
-          - https://zeustracker.abuse.ch/blocklist.php?download=domainblocklist
           - https://s3.amazonaws.com/lists.disconnect.me/simple_tracking.txt
           kids:
           - https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews-gambling-porn/hosts
+          none:
         whiteLists:
           ads:
-          - https://raw.githubusercontent.com/chadmayfield/my-pihole-blocklists/master/white.list
+          - https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/whitelist.txt
+          - https://raw.githubusercontent.com/billimek/k8s-gitops/master/default/blocky/whitelist.txt
         # definition: which groups should be applied for which client
         clientGroupsBlock:
           # default will be used, if no special definition for a client name exists
@@ -68,49 +101,18 @@ spec:
             - ads
             # - special
           # use client name or ip address
-          192.168.2.160: [] # ali_phone
-          192.168.2.156: [] # ali_computer
+          192.168.2.160: # ali_phone 
+            - none 
+          192.168.2.156: # ali_computer
+            - none
           192.168.2.155: # luke_computer
             - ads
             - kids
 
-
-        # which response will be sent, if query is blocked:
-        #   zeroIp: 0.0.0.0 will be returned (default)
-        #   nxDomain: return NXDOMAIN as return code
-        # blockType: zeroIp
-
-        # optional: automatically list refresh period in minutes. Default: 4h.
-        # Negative value -> deactivate automatically refresh.
-        # 0 value -> use default
-        # refreshPeriod: 1
-
-      # optional: configuration for caching of DNS responses
-      # caching:
-      #   # amount in minutes, how long a response must be cached (min value).
-      #   # If <=0, use response's TTL, if >0 use this value, if TTL is smaller
-      #   # Default: 0
-      #   minTime: 40
-      #   # amount in minutes, how long a response must be cached (max value).
-      #   # If <0, do not cache responses
-      #   # If 0, use TTL
-      #   # If > 0, use this value, if TTL is greater
-      #   # Default: 0
-      #   maxTime: -1
-
-      # optional: configuration of client name resolution
-      # clientLookup:
-      #   # this DNS resolver will be used to perform reverse DNS lookup (typically local router)
-      #   upstream: udp:192.168.178.1
-      #   # optional: some routers return multiple names for client (host name and user defined name). Define which single name should be used.
-      #   # Example: take second name if present, if not take first name
-      #   singleNameOrder:
-      #     - 2
-      #     - 1
       # optional: configuration for prometheus metrics endpoint
       prometheus:
         # enabled if true
-        enable: true
+        enable: false
         # url path, optional (default '/metrics')
         path: /metrics
 
@@ -118,64 +120,3 @@ spec:
       httpPort: 4000
       # optional: Log level (one from debug, info, warn, error). Default: info
       logLevel: info
-
-
-    # Probes configuration
-    probes:
-      liveness:
-        failureThreshold: 9999
-        periodSeconds: 10
-      readiness:
-        failureThreshold: 9999
-        periodSeconds: 10
-      startup:
-        initialDelaySeconds: 5
-        failureThreshold: 9999
-        periodSeconds: 10
-
-    serviceTCP:
-      enabled: true
-      type: LoadBalancer
-      externalTrafficPolicy: Local
-      loadBalancerIP: ""
-        # a fixed LoadBalancer IP
-      annotations: {}
-
-    serviceUDP:
-      enabled: true
-      type: LoadBalancer
-      externalTrafficPolicy: Local
-      loadBalancerIP: ""
-        # a fixed LoadBalancer IP
-      annotations: {}
-
-    serviceMonitor:
-      enabled: false
-      additionalLabels: {}
-
-    ## Pod Annotations
-    podAnnotations: {}
-
-    resources: {}
-      # We usually recommend not to specify default resources and to leave this as a conscious
-      # choice for the user. This also increases chances charts run on environments with little
-      # resources, such as Minikube. If you do want to specify resources, uncomment the following
-      # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-      # limits:
-      #  memory: 500Mi
-      # requests:
-      #  cpu: 50m
-      #  memory: 275Mi
-
-    nodeSelector: {}
-
-    tolerations: []
-
-    affinity: {}
-
-    ## Add any extra files you want populated to /app here, e.g.:
-    #  extraLists:
-    #    whitelist.txt: |
-    #      analytics.google.com
-    #      googleadservices.com
-    extraLists: {}
