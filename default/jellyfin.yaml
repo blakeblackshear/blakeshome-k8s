@@ -2,38 +2,36 @@
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
-  name: qbittorrent
+  name: jellyfin
   namespace: default
 spec:
   entryPoints:
     - websecure
   routes:
-  - match: Host(`torrents.blakeshome.com`)
+  - match: Host(`jellyfin.blakeshome.com`)
     kind: Rule
     services:
-      - name: qbittorrent
-        port: 8080
-    middlewares:
-      - name: traefik-forward-auth
+      - name: jellyfin
+        port: 8096
   tls:
     certResolver: le
 ---
 kind: Service
 apiVersion: v1
 metadata:
-  name: qbittorrent
+  name: jellyfin
 spec:
   type: ClusterIP
   ports:
-  - port: 8080
-    targetPort: 8080
+  - port: 8096
+    targetPort: 8096
 ---
 kind: Endpoints
 apiVersion: v1
 metadata:
-  name: qbittorrent
+  name: jellyfin
 subsets:
   - addresses:
       - ip: 192.168.2.237
     ports:
-      - port: 8080
+      - port: 8096

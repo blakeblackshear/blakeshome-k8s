@@ -56,7 +56,7 @@ spec:
     spec:
       containers:
         - name: filebrowser
-          image: "filebrowser/filebrowser:v2.15.0"
+          image: "filebrowser/filebrowser:v2.23.0"
           imagePullPolicy: IfNotPresent
           args:
             - --noauth
@@ -65,19 +65,9 @@ spec:
               containerPort: 80
               protocol: TCP
           volumeMounts:
-            - mountPath: /srv/media
-              name: media
-            - mountPath: /srv/media2
-              name: media2
             - mountPath: /srv/minecraft
               name: minecraft
       volumes:
-        - name: media
-          persistentVolumeClaim:
-            claimName: media
-        - name: media2
-          persistentVolumeClaim:
-            claimName: media2
         - name: minecraft
           persistentVolumeClaim:
             claimName: data-minecraft-creative-0

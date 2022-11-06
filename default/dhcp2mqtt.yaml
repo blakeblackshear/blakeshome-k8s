@@ -26,4 +26,4 @@ spec:
             - name: MQTT_HOST
               value: "default-mosquitto"
             - name: MACS_TO_MONITOR
-              value: "58:cb:52:14:ac:73,3c:28:6d:e3:ec:c4"
+              value: "dc:e5:5b:18:d3:2b,3c:28:6d:e3:ec:c4"

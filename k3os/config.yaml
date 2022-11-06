@@ -4,14 +4,12 @@ write_files:
     /dev/usbdisk  /media/usb    vfat    noauto,ro 0 0
     UUID=66a06c33-16e8-4f43-9965-ad0fa6188378 /mnt/data ext4 defaults 0 2
     UUID=cb989cc5-36fb-4e6e-8c22-deb2dc122816 /mnt/data2 ext4 defaults 0 2
-    UUID=640c3ec1-c84b-48c1-9866-0de6aad45bc5 /mnt/data3 ext4 defaults 0 2
   owner: root
   path: /etc/fstab
   permissions: '0644'
 boot_cmd:
 - "mkdir /mnt/data || echo data dir exists"
 - "mkdir /mnt/data2 || echo data2 dir exists"
-- "mkdir /mnt/data3 || echo data3 dir exists"
 k3os:
   k3s_args:
   - server

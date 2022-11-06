@@ -1,0 +1,35 @@
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: frigate-demo
+  namespace: default
+spec:
+  entryPoints:
+    - web
+  routes:
+  - match: Host(`demo.frigate.video`)
+    kind: Rule
+    services:
+      - name: frigate-demo
+        port: 5000
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: frigate-demo
+spec:
+  type: ClusterIP
+  ports:
+  - port: 5000
+    targetPort: 5000
+---
+kind: Endpoints
+apiVersion: v1
+metadata:
+  name: frigate-demo
+subsets:
+  - addresses:
+      - ip: 10.0.10.144
+    ports:
+      - port: 5000

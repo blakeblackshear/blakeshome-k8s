@@ -50,7 +50,7 @@ spec:
       dnsPolicy: ClusterFirstWithHostNet
       containers:
         - name: esphome
-          image: "esphome/esphome:1.19.4"
+          image: "ghcr.io/esphome/esphome:2022.10.2"
           imagePullPolicy: IfNotPresent
           ports:
             - name: http

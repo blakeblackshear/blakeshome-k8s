@@ -44,7 +44,7 @@ spec:
   values:
     image:
       repository: jacobalberty/unifi
-      tag: v6.2.26
+      tag: v7.2.95
     persistence:
       enabled: true
       size: 10Gi
@@ -57,6 +57,13 @@ spec:
       type: LoadBalancer
     discoveryService:
       type: LoadBalancer
+    probes:
+      liveness:
+        enabled: false
+      readiness:
+        enabled: false
+      startup:
+        enabled: false
     resources:
       requests:
         memory: 500Mi

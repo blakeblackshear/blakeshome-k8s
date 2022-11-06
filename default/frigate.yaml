@@ -61,22 +61,19 @@ metadata:
   namespace: default
 spec:
   chart:
-      git: https://github.com/blakeblackshear/billimek-charts
-      ref: master
-      path: charts/frigate
+      repository: https://blakeblackshear.github.io/blakeshome-charts/
+      name: frigate
+      version: 6.3.0
   values:
-    replicaCount: 1
-
     strategyType: Recreate
 
     image:
-      repository: blakeblackshear/frigate
-      tag: 0.8.4-amd64
+      repository: ghcr.io/blakeblackshear/frigate
+      tag: dev-9b5c6be
+      # pullPolicy: Always
 
-    extraSecretForEnvFrom:
+    envFromSecrets:
       - frigate-rtsp
-
-    timezone: America/Chicago
 
     coral:
       enabled: true
@@ -91,9 +88,18 @@ spec:
       - mountPath: /media/frigate
         name: frigate
 
+    env:
+      TZ: America/Chicago
+      PLUS_API_KEY: cb99ff41-e784-4277-a2bb-2f611bc5203a:c04a3071e3837e8ca74bb17fcaf1e264753f1dfa
+
     shmSize: 500Mi
 
     config: |
+      detectors:
+        coral:
+          type: edgetpu
+          device: usb:0
+
       mqtt:
         host: default-mosquitto
         topic_prefix: frigate
@@ -107,8 +113,52 @@ spec:
           - /dev/dri/renderD128
           - -hwaccel_output_format
           - yuv420p
+
+      record:
+        enabled: True
+        retain:
+          days: 7
+          mode: motion
+        events:
+          pre_capture: 3
+          retain:
+            default : 21
+
+      snapshots:
+        enabled: True
       
       cameras:
+        # wyze:
+        #   ffmpeg:
+        #     inputs: 
+        #       - path: rtsp://viewer:viewer@192.168.2.195/live
+        #         roles:
+        #           - detect
+        #           - record
+        #   rtmp:
+        #     enabled: False
+        #   record:
+        #     enabled: True
+        #     retain:
+        #       days: 2
+        #       mode: motion
+        #   detect:
+        #     # width: 640
+        #     # height: 360
+        #     fps: 5
+        #   motion:
+        #     improve_contrast: True
+        #     # contour_area: 125
+        #     mask:
+        #       - 915,720,1248,720,1248,671,916,673
+        #   objects:
+        #     track:
+        #       - person
+        #       - dog
+        #       - bear
+        #       - cat
+        #       - sheep
+        #       - cow
         back:
           ffmpeg:
             inputs: 
@@ -116,25 +166,23 @@ spec:
                 roles:
                   - detect
                   - rtmp
+                  - restream
               - path: rtsp://viewer:{FRIGATE_BACK_PASSWORD}@10.0.10.10:554/live
                 roles:
-                  - clips
                   - record
-          width: 1920
-          height: 1080
+          rtmp:
+            enabled: True
+          detect:
+            width: 1920
+            height: 1080
+            fps: 5
           motion:
             mask:
-              - 1855,38,1851,100,1305,101,1304,43
-          record:
-            enabled: True
-            retain_days: 14
-          clips:
-            enabled: True
-            pre_capture: 3
-            retain:
-              default : 14
-          snapshots:
-            enabled: True
+              - 1855,0,1851,100,1289,96,1105,161,1045,119,890,121,890,0
+              - 505,95,506,138,388,153,384,114
+              - 689,72,689,122,549,134,547,89
+              - 261,134,264,176,169,195,167,158
+              - 145,159,146,202,70,220,65,183
           best_image_timeout: 10
           zones:
             yard:
@@ -156,25 +204,20 @@ spec:
                 roles:
                   - detect
                   - rtmp
+                  - restream
               - path: rtsp://viewer:{FRIGATE_BACK_PASSWORD}@10.0.10.118:554/live
                 roles:
-                  - clips
                   - record
-          height: 1920
-          width: 1080
+          rtmp:
+            enabled: True
+          detect:
+            height: 1920
+            width: 1080
+            fps: 5
           motion:
             mask:
-              - 1078,5,1074,276,8,313,8,9
-          record:
-            enabled: True
-            retain_days: 14
-          clips:
-            enabled: True
-            pre_capture: 3
-            retain:
-              default : 14
-          snapshots:
-            enabled: True
+              - 1080,0,1080,282,157,367,114,458,59,504,0,514,0,0
+              - 301,744,488,998,346,1093,103,1052,0,783
           best_image_timeout: 10
           zones:
             front_porch:
@@ -182,7 +225,17 @@ spec:
               filters:
                 person:
                   min_area: 50000
+          record:
+            events:
+              required_zones:
+                - front_porch
+          snapshots:
+            required_zones:
+              - front_porch
           objects:
+            track:
+              - person
+              - car
             filters:
               person:
                 min_area: 20000
@@ -194,6 +247,7 @@ spec:
         enabled: false
 
     service:
+      type: LoadBalancer
       port: 5000
 
     ingress:

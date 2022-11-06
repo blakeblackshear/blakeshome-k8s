@@ -2,17 +2,17 @@
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
-  name: qbittorrent
+  name: radarr
   namespace: default
 spec:
   entryPoints:
     - websecure
   routes:
-  - match: Host(`torrents.blakeshome.com`)
+  - match: Host(`radarr.blakeshome.com`)
     kind: Rule
     services:
-      - name: qbittorrent
-        port: 8080
+      - name: radarr
+        port: 7878
     middlewares:
       - name: traefik-forward-auth
   tls:
@@ -21,19 +21,19 @@ spec:
 kind: Service
 apiVersion: v1
 metadata:
-  name: qbittorrent
+  name: radarr
 spec:
   type: ClusterIP
   ports:
-  - port: 8080
-    targetPort: 8080
+  - port: 7878
+    targetPort: 7878
 ---
 kind: Endpoints
 apiVersion: v1
 metadata:
-  name: qbittorrent
+  name: radarr
 subsets:
   - addresses:
       - ip: 192.168.2.237
     ports:
-      - port: 8080
+      - port: 7878
